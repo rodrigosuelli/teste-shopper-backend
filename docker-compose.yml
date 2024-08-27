@@ -1,4 +1,4 @@
-# Prefer to use compose.yml over docker-compose.yml
+# Prefer to use `compose.yml` over `docker-compose.yml` file name
 services:
   api:
     build:
