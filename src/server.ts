@@ -9,7 +9,7 @@ const port = 3000;
 app.use(cors());
 app.use(express.json()); // required to parse json body from incoming requests
 
-app.use('/api', router);
+app.use('/', router);
 
 app.listen(port, () => {
   console.log(`Express.js server listening on port ${port}`);
