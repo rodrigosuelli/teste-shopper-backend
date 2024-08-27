@@ -1,0 +1,12 @@
+# Prefer to use compose.yml over docker-compose.yml
+services:
+  api:
+    build:
+      context: .
+      target: production
+
+    environment:
+      - NODE_ENV=production
+
+    ports:
+      - 3000:3000
