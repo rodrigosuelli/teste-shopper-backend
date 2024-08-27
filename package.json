@@ -10,7 +10,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
-    "dcompose": "docker compose up -d"
+    "dcompose": "docker compose up"
   },
   "keywords": [],
   "author": "",
