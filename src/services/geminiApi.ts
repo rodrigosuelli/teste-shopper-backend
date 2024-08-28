@@ -57,4 +57,6 @@ export async function promptWithUploadedImage(
 
   // Output the generated text to the console
   console.log(result.response.text());
+
+  return result;
 }
