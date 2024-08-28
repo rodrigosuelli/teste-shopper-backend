@@ -19,7 +19,12 @@ export async function upload(req: Request, res: Response, next: NextFunction) {
 
     const data = uploadEndpointSchema.parse(req.body);
 
-    const { image: imageDataURIString } = data;
+    const {
+      image: imageDataURIString,
+      customer_code,
+      measure_datetime,
+      measure_type,
+    } = data;
 
     const { mimeType, base64String } = parseDataURI(imageDataURIString);
 
@@ -29,7 +34,11 @@ export async function upload(req: Request, res: Response, next: NextFunction) {
       'Describe the image'
     );
 
-    res.status(200).json({ success: true, ...data });
+    console.log(result);
+
+    res
+      .status(200)
+      .json({ success: true, customer_code, measure_datetime, measure_type });
   } catch (error) {
     if (error instanceof z.ZodError) {
       const validationError = fromError(error, { prefix: null });
