@@ -32,5 +32,8 @@ export async function promptWithBase64Image(
     },
   ]);
 
+  // Output the generated text to the console
+  console.log(result.response.text());
+
   return result;
 }
