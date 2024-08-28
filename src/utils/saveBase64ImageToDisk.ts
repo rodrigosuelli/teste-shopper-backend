@@ -1,26 +1,45 @@
 import { writeFileSync } from 'fs';
 
 /**
- * Saves a base64 encoded string as a file on disk.
+ * Saves an image from a data URI on disk, automatically determining the file extension.
  *
- * @param filePathToSave - Relative path to the project root with file extension, Example: `./temp/myfilename.jpg`.
- * @param base64String - The base64 encoded string representing file data.
- * @throws Will throw an error if the file cannot be written.
+ * @param filePathToSave - Relative path to save the image file without the extension, e.g., `./temp/myimage`.
+ * @param dataUri - The data URI containing the base64 encoded string representing the image data.
+ * @throws Will throw an error if the file cannot be written or if the data URI is not an image.
  */
-export default function saveBase64FileToDisk(
+export default function saveImageFromDataUri(
   filePathToSave: string,
-  base64String: string
+  dataUri: string
 ): void {
   try {
+    // Extract the MIME type from the data URI
+    const mimeTypeMatch = dataUri.match(/^data:(image\/.+?);base64,/);
+    if (!mimeTypeMatch) {
+      throw new Error(
+        'Invalid data URI: The MIME type is not recognized as an image.'
+      );
+    }
+
+    const mimeType = mimeTypeMatch[1];
+
+    // Determine the file extension based on the MIME type
+    const extension = mimeType.split('/')[1];
+
+    // Remove the data URI scheme prefix to get the pure base64 string
+    const base64Data = dataUri.replace(/^data:image\/.+?;base64,/, '');
+
     // Decode the base64 string
-    const buffer = Buffer.from(base64String, 'base64');
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    // Construct the full file path with the determined extension
+    const fullFilePath = `${filePathToSave}.${extension}`;
 
     // Write the buffer to the specified file path
-    writeFileSync(filePathToSave, buffer);
+    writeFileSync(fullFilePath, buffer);
 
-    console.log(`File saved successfully at: ${filePathToSave}`);
+    console.log(`Image saved successfully at: ${fullFilePath}`);
   } catch (error: unknown) {
-    let errorMessage = `Failed to save the file at ${filePathToSave}.`;
+    let errorMessage = `Failed to save the image at ${filePathToSave}.`;
 
     if (error instanceof Error) {
       errorMessage += ` Error: ${error.message}`;
