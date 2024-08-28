@@ -3,7 +3,9 @@ dist
 .env
 teste.ts
 
-# Ignore everything inside the temp folder
+# Ignore everything inside folder
 temp/*
+uploads/*
 # Except the .gitkeep file
 !temp/.gitkeep
+!uploads/.gitkeep

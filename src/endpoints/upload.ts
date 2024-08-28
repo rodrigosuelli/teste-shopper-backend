@@ -1,17 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import { fromError } from 'zod-validation-error';
+import { v4 as uuidv4 } from 'uuid';
 import { promptWithBase64Image } from '../services/geminiApi';
-import parseDataURI from '../utils/parseDataURI';
+import saveBase64FileToDisk from '../utils/saveBase64FileToDisk';
+import { PORT, uploadsFolderName, uploadsFolderPath } from '../config';
 
 export async function upload(req: Request, res: Response, next: NextFunction) {
   try {
-    // Regular expression to match image Data URI
-    const imageDataUriRegex =
-      /^data:image\/(png|jpeg|jpg|gif|webp);base64,[A-Za-z0-9+/=]+$/;
-
     const uploadEndpointSchema = z.object({
-      image: z.string().regex(imageDataUriRegex, 'Invalid image Data URI'),
+      image: z.string().base64(),
       customer_code: z.string(),
       measure_datetime: z.string().datetime(),
       measure_type: z.enum(['WATER', 'GAS']),
@@ -19,26 +17,41 @@ export async function upload(req: Request, res: Response, next: NextFunction) {
 
     const data = uploadEndpointSchema.parse(req.body);
 
-    const {
-      image: imageDataURIString,
-      customer_code,
-      measure_datetime,
-      measure_type,
-    } = data;
+    const { image: imageBase64String } = data;
 
-    const { mimeType, base64String } = parseDataURI(imageDataURIString);
-
+    // Gemini prompt
     const result = await promptWithBase64Image(
-      mimeType,
-      base64String,
-      'Describe the image'
+      'image/png',
+      imageBase64String,
+      `Return the consumption value presented by the meter in the image as an integer and nothing else.
+       If it is not possible to detect the value then an error message can be returned,
+       but make sure that the error message does not contain any numbers.`
     );
 
-    console.log(result);
+    const resultMessage = result.response.text();
 
-    res
-      .status(200)
-      .json({ success: true, customer_code, measure_datetime, measure_type });
+    const measureValue = parseInt(resultMessage, 10);
+    const measureUuid = uuidv4();
+
+    const fileNameWithExt = `${measureUuid}.png`;
+    const filePathWithExt = `${uploadsFolderPath}/${fileNameWithExt}`;
+    const uploadedImageUrl = `http://localhost:${PORT}/${uploadsFolderName}/${fileNameWithExt}`;
+
+    // Save file to Uploads folder
+    saveBase64FileToDisk(filePathWithExt, imageBase64String);
+
+    // Gemini was unable to detect the value in the image
+    // if (Number.isNaN(measureValue)) {
+    //   throw new Error(
+    //     'The server was unable to detect the value in the image sent, please make sure the image sent has a clear and visible value to be detected.'
+    //   );
+    // }
+
+    res.status(200).json({
+      measure_value: measureValue,
+      measure_uuid: measureUuid,
+      image_url: uploadedImageUrl,
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       const validationError = fromError(error, { prefix: null });
