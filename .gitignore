@@ -1,6 +1,8 @@
 node_modules
 dist
 .env
+teste.ts
+
 # Ignore everything inside the temp folder
 temp/*
 # Except the .gitkeep file
