@@ -13,7 +13,7 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 const model = genAI.getGenerativeModel({
   // Choose a Gemini model.
-  model: 'gemini-1.5-pro',
+  model: 'gemini-1.5-flash',
 });
 
 export async function promptWithBase64Image(
