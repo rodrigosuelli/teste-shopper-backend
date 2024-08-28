@@ -1,4 +1,3 @@
-import { isAxiosError } from 'axios';
 import { NextFunction, Request, Response } from 'express';
 
 export function customErrorHandler(
@@ -10,7 +9,7 @@ export function customErrorHandler(
   console.log({ error });
 
   return res.status(500).json({
-    error_code: isAxiosError(error) ? error.code : error.name,
+    error_code: error.name,
     error_description: error.message || null,
   });
 }
