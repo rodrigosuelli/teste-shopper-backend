@@ -1,27 +1,31 @@
 import { NextFunction, Request, Response } from 'express';
-
-type UploadReqBody = {
-  image?: string;
-  customer_code?: string;
-  measure_datetime?: string;
-  measure_type?: string;
-};
+import { z } from 'zod';
+import { fromError } from 'zod-validation-error';
 
 export function upload(req: Request, res: Response, next: NextFunction) {
   try {
-    const { image, customer_code, measure_datetime, measure_type } =
-      req.body as UploadReqBody;
+    const uploadEndpointSchema = z.object({
+      image: z.string().base64(),
+      customer_code: z.string(),
+      measure_datetime: z.string().datetime(),
+      measure_type: z.enum(['WATER', 'GAS']),
+    });
 
-    console.log(req.body);
+    const data = uploadEndpointSchema.parse(req.body);
 
-    if (measure_type !== 'WATER' && measure_type !== 'GAS') {
-      throw new Error(
-        'Error: Measure type needs to be equals to `WATER` or `GAS`'
-      );
+    res.status(200).json({ success: true, ...data });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const validationError = fromError(error, { prefix: null });
+
+      res.status(400).json({
+        error_code: 'INVALID_DATA',
+        error_description: validationError.toString(),
+      });
+
+      return;
     }
 
-    res.status(200).json({ success: true });
-  } catch (error) {
     next(error);
   }
 }
