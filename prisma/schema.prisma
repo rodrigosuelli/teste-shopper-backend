@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model MeasureType {
+  id        Int       @id @default(autoincrement())
+  type      String    @unique @map("measure_type")
+  imageUrl  String    @map("image_url")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  measures  Measure[]
+
+  @@map("measure_types")
+}
+
+model Measure {
+  uuid          String      @id @default(uuid()) @map("measure_uuid")
+  datetime      DateTime    @default(now()) @map("measure_datetime")
+  customerCode  String      @map("customer_code")
+  hasConfirmed  Boolean     @default(false) @map("has_confirmed")
+  measureValue  Int         @map("measure_value")
+  measureType   MeasureType @relation(fields: [measureTypeId], references: [id])
+  measureTypeId Int         @map("measure_type_id")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  @@map("measures")
+}
