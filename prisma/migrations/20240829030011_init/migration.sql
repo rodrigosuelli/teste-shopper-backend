@@ -2,7 +2,6 @@
 CREATE TABLE "measure_types" (
     "id" SERIAL NOT NULL,
     "measure_type" TEXT NOT NULL,
-    "image_url" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -13,6 +12,7 @@ CREATE TABLE "measure_types" (
 CREATE TABLE "measures" (
     "measure_uuid" TEXT NOT NULL,
     "measure_datetime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "image_url" TEXT NOT NULL,
     "customer_code" TEXT NOT NULL,
     "has_confirmed" BOOLEAN NOT NULL DEFAULT false,
     "measure_value" INTEGER NOT NULL,

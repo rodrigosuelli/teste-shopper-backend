@@ -16,7 +16,6 @@ datasource db {
 model MeasureType {
   id        Int       @id @default(autoincrement())
   type      String    @unique @map("measure_type")
-  imageUrl  String    @map("image_url")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   measures  Measure[]
@@ -27,6 +26,7 @@ model MeasureType {
 model Measure {
   uuid          String      @id @default(uuid()) @map("measure_uuid")
   datetime      DateTime    @default(now()) @map("measure_datetime")
+  imageUrl      String      @map("image_url")
   customerCode  String      @map("customer_code")
   hasConfirmed  Boolean     @default(false) @map("has_confirmed")
   measureValue  Int         @map("measure_value")
