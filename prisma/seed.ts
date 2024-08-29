@@ -10,7 +10,7 @@ async function main() {
     skipDuplicates: true,
   });
 
-  console.log('Inserted data:');
+  console.log('Data inserted into the measure_types table:');
   console.log(populatedMeasureTypes);
   console.log('Seeding completed with success.');
 }
