@@ -17,6 +17,8 @@ COPY . .
 
 RUN npm run build
 
+# Run database migrations
+RUN npx prisma migrate deploy
 # Seed the database
 RUN npx prisma db seed
 
