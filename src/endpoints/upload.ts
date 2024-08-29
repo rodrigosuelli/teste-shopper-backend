@@ -4,7 +4,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { DateTime } from 'luxon';
 import { promptWithBase64Image } from '../services/geminiApi';
 import saveBase64FileToDisk from '../utils/saveBase64FileToDisk';
-import { PORT, uploadsFolderName, uploadsFolderPath } from '../config';
+import {
+  PORT,
+  requiredMeasureTypes,
+  uploadsFolderName,
+  uploadsFolderPath,
+} from '../config';
 import prisma from '../db/client';
 
 export async function uploadEndpoint(
@@ -13,8 +18,6 @@ export async function uploadEndpoint(
   next: NextFunction
 ) {
   try {
-    const requiredMeasureTypes = ['WATER', 'GAS'] as const;
-
     const uploadEndpointSchema = z.object({
       image: z.string().base64(),
       customer_code: z.string(),
