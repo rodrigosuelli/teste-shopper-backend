@@ -1,17 +1,31 @@
 # Prefer to use `compose.yml` over `docker-compose.yml` file name
+volumes:
+  postgres-data:
+
+networks:
+  app-tier:
+    driver: bridge
+
 services:
   api:
     build:
       context: .
-      target: production
+    networks:
+      - app-tier
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+      # Use localhost as host for development and the db container name as host for production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
     ports:
       - 3000:3000
+    depends_on:
+      db:
+        condition: service_healthy
 
   db:
     image: bitnami/postgresql:latest
+    networks:
+      - app-tier
     ports:
       - 5432:5432
     volumes:
@@ -20,6 +34,10 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres
-
-volumes:
-  postgres-data:
+    healthcheck:
+      # test: ['CMD', 'pg_isready']
+      test: ['CMD-SHELL', "sh -c 'pg_isready -U postgres -d postgres'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s

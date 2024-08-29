@@ -11,9 +11,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
-    "dcompose": "docker compose up"
+    "start": "node dist/src/server.js",
+    "start:migrate:seed": "prisma generate && prisma migrate deploy && prisma db seed && npm run start"
   },
   "keywords": [],
   "author": "",

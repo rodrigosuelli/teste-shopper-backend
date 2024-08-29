@@ -15,6 +15,10 @@ app.use(express.json({ limit: '2mb' })); // required to parse json body from inc
 app.use('/', router);
 
 app.listen(PORT, () => {
-  console.log(`Express.js server listening on PORT ${PORT}`);
+  console.log(`Starting Express.js server...`);
   console.log(`Uploads folder path: ${uploadsFolderPath}`);
+  console.log(`process.env.NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`process.env.DATABASE_URL: ${process.env.DATABASE_URL}`);
+  console.log(`process.env.GEMINI_API_KEY: ${process.env.GEMINI_API_KEY}`);
+  console.log(`Express.js server listening on PORT ${PORT}`);
 });

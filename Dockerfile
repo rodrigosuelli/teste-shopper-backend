@@ -1,49 +1,45 @@
-# Build stage
-FROM node:20-alpine AS build
+FROM node:20-alpine
 
+# Create a non-root user and group to run the application
+RUN addgroup app && adduser -S -G app app
+
+# set the user to run the app
+USER app
+
+# Set the working directory
 WORKDIR /app
 
-# copy package.json and package-lock.json to the working directory
-# This is done before copying the rest of the files to take advantage of Docker’s cache
-# If the package.json and package-lock.json files haven’t changed, Docker will use the cached dependencies
-COPY package*.json .
+# Copy package.json and package-lock.json first to leverage Docker’s cache
+COPY package*.json ./
 
-# install dependencies
-# Use `npm install --omit=dev` to skip dev dependencies
+# Switch to root to change ownership of files
+USER root
+
+# Change the ownership of the /app directory to the app user
+RUN chown -R app:app .
+
+# Switch back to the non-root user
+USER app
+
+# Install dependencies
 RUN npm install
 
-# copy the rest of the files to the working directory
-COPY . .
+# Copy the rest of the application code
+# COPY . .
 
+# Copy the rest of the application files and directories with read and write permissions to all of them
+COPY --chown=app:app . .
+
+# Build the project
 RUN npm run build
 
-# Run database migrations
-RUN npx prisma migrate deploy
-# Seed the database
-RUN npx prisma db seed
+# Install only production dependencies
+# Use `npm install --omit=dev` to skip dev dependencies
+# RUN npm install --omit=dev
 
-# Production stage
-FROM gcr.io/distroless/nodejs20-debian12 AS production
-
-WORKDIR /app
-
-COPY package*.json .
-
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/package.json ./package.json
-
-# Copy uploads folder and .env file
-COPY --from=build /app/.env ./.env
-COPY --from=build /app/uploads ./uploads
-# COPY --from=prod-deps /app/node_modules ./node_modules
-# COPY --from=build /app/src ./src
-
-# expose port 3000 to tell Docker that the container listens on the specified network ports at runtime
+# Expose the application port
 EXPOSE 3000
 
-# command to run the app
-# with distroless image just use the name of the main file
-CMD ["dist/server.js"]
-# CMD ["src/server.js"]
+# Set the command to run the application
 # CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start:migrate:seed"]
