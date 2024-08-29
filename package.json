@@ -6,6 +6,9 @@
   },
   "description": "",
   "main": "src/server.ts",
+  "prisma": {
+    "seed": "ts-node --transpile-only prisma/seed.ts"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
