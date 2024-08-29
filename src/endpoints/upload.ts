@@ -55,25 +55,37 @@ export async function uploadEndpoint(
       );
     }
 
-    const startOfCurrentMonth = DateTime.now().startOf('month').toJSDate();
-    const enfOfCurrentMonth = DateTime.now().endOf('month').toJSDate();
+    const now = DateTime.now();
+    const dateEntered = DateTime.fromISO(measure_datetime);
+
+    if (dateEntered > now) {
+      res.status(400).json({
+        error_code: 'INVALID_DATA',
+        error_description:
+          'Foi inserida uma data futura em \\"measure_datetime\\""',
+      });
+      return;
+    }
+
+    const startOfMeasureDateMonth = dateEntered.startOf('month').toJSDate();
+    const enfOfMeasureDateMonth = dateEntered.endOf('month').toJSDate();
 
     const alreadyRegisteredMeasureInMonth = await prisma.measure.findFirst({
       where: {
         customerCode: customer_code,
         measureTypeId: selectedMeasureTypeId,
         datetime: {
-          gte: startOfCurrentMonth,
-          lte: enfOfCurrentMonth,
+          gte: startOfMeasureDateMonth,
+          lte: enfOfMeasureDateMonth,
         },
       },
     });
 
-    // Leitura já cadastrada no mês
+    // Leitura já cadastrada no mês em questão
     if (alreadyRegisteredMeasureInMonth) {
       res.status(409).json({
         error_code: 'DOUBLE_REPORT',
-        error_description: 'Leitura do mês já realizada',
+        error_description: `A leitura do tipo '${measure_type}' do mês inserido já foi realizada`,
       });
       return;
     }
