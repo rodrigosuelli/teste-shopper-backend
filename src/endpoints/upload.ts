@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import { fromError } from 'zod-validation-error';
 import { v4 as uuidv4 } from 'uuid';
+import { DateTime } from 'luxon';
 import { promptWithBase64Image } from '../services/geminiApi';
 import saveBase64FileToDisk from '../utils/saveBase64FileToDisk';
 import { PORT, uploadsFolderName, uploadsFolderPath } from '../config';
@@ -51,15 +52,22 @@ export async function upload(req: Request, res: Response, next: NextFunction) {
       );
     }
 
-    const alreadyRegisteredMeasure = await prisma.measure.findUnique({
+    const startOfCurrentMonth = DateTime.now().startOf('month').toJSDate();
+    const enfOfCurrentMonth = DateTime.now().endOf('month').toJSDate();
+
+    const alreadyRegisteredMeasureInMonth = await prisma.measure.findFirst({
       where: {
-        uuid: customer_code,
+        customerCode: customer_code,
         measureTypeId: selectedMeasureTypeId,
+        datetime: {
+          gte: startOfCurrentMonth,
+          lte: enfOfCurrentMonth,
+        },
       },
     });
 
     // Leitura já cadastrada no mês
-    if (alreadyRegisteredMeasure) {
+    if (alreadyRegisteredMeasureInMonth) {
       res.status(409).json({
         error_code: 'DOUBLE_REPORT',
         error_description: 'Leitura do mês já realizada',
@@ -77,7 +85,7 @@ export async function upload(req: Request, res: Response, next: NextFunction) {
     );
 
     const resultMessage = result.response.text();
-    const measureValue = parseInt(resultMessage, 10);
+    const measureValue = parseInt(resultMessage, 10) || 0; // 0 if gemini cant determine
     const measureUuid = uuidv4();
 
     // Save file to Uploads folder
@@ -93,7 +101,7 @@ export async function upload(req: Request, res: Response, next: NextFunction) {
         datetime: measure_datetime,
         imageUrl: uploadedImageUrl,
         measureValue,
-        measureTypeId: selectedMeasureTypeId,
+        measureType: { connect: { id: selectedMeasureTypeId } },
       },
     });
 
