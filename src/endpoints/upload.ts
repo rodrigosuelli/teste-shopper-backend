@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
-import { fromError } from 'zod-validation-error';
 import { v4 as uuidv4 } from 'uuid';
 import { DateTime } from 'luxon';
 import { promptWithBase64Image } from '../services/geminiApi';
@@ -8,7 +7,11 @@ import saveBase64FileToDisk from '../utils/saveBase64FileToDisk';
 import { PORT, uploadsFolderName, uploadsFolderPath } from '../config';
 import prisma from '../db/client';
 
-export async function upload(req: Request, res: Response, next: NextFunction) {
+export async function uploadEndpoint(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const requiredMeasureTypes = ['WATER', 'GAS'] as const;
 
@@ -111,17 +114,6 @@ export async function upload(req: Request, res: Response, next: NextFunction) {
       image_url: newMeasure.imageUrl,
     });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      const validationError = fromError(error, { prefix: null });
-
-      res.status(400).json({
-        error_code: 'INVALID_DATA',
-        error_description: validationError.toString(),
-      });
-
-      return;
-    }
-
     next(error);
   }
 }
