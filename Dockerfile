@@ -17,6 +17,9 @@ COPY . .
 
 RUN npm run build
 
+# Seed the database
+RUN npx prisma db seed
+
 # Production stage
 FROM gcr.io/distroless/nodejs20-debian12 AS production
 
