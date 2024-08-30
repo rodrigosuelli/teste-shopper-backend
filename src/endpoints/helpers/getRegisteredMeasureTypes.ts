@@ -1,5 +1,5 @@
-import { requiredMeasureTypes } from '../config';
-import prisma from '../db/client';
+import { requiredMeasureTypes } from '../../config';
+import prisma from '../../db/client';
 
 export default async function getRegisteredMeasureTypes() {
   const measureTypesArr = await prisma.measureType.findMany({

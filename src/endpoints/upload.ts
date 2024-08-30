@@ -11,7 +11,7 @@ import {
   uploadsFolderPath,
 } from '../config';
 import prisma from '../db/client';
-import getRegisteredMeasureTypes from '../helpers/getRegisteredMeasureTypes';
+import getRegisteredMeasureTypes from './helpers/getRegisteredMeasureTypes';
 
 export async function uploadEndpoint(
   req: Request,
