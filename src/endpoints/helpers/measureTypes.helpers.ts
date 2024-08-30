@@ -12,16 +12,20 @@ async function getRegisteredMeasureTypes() {
     throw new Error('No measure types are registered in the database');
   }
 
-  // Create registeredMeasureTypes obj with each measure_type as a property
-  const registeredMeasureTypes = measureTypesArr.reduce<
-    Record<
-      string,
-      Pick<(typeof measureTypesArr)[number], 'id' | 'measure_type'>
-    >
-  >((acc, { id, measure_type }) => {
-    acc[measure_type] = { id, measure_type };
-    return acc;
-  }, {});
+  type MeasureType = {
+    id: number;
+    measure_type: string;
+  };
+
+  const registeredMeasureTypes: Record<string, MeasureType> = {};
+
+  // Add each type as a property to the registeredMeasureTypes object
+  measureTypesArr.forEach((e: MeasureType) => {
+    registeredMeasureTypes[e.measure_type] = {
+      id: e.id,
+      measure_type: e.measure_type,
+    };
+  });
 
   const missingTypes = requiredMeasureTypes.filter(
     (type) => !registeredMeasureTypes[type]

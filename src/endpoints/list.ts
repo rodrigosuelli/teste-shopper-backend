@@ -48,14 +48,26 @@ export async function listEndpoint(
         },
       });
 
+      type CustomerMeasureType = {
+        measure_uuid: string;
+        measure_datetime: Date;
+        has_confirmed: boolean;
+        image_url: string | null;
+        measureType: {
+          measure_type: string;
+        };
+      };
+
       // Format: flatten the measureType relation field
-      customerMeasures = customerMeasures.map((measure) => ({
-        measure_uuid: measure.measure_uuid,
-        measure_datetime: measure.measure_datetime,
-        has_confirmed: measure.has_confirmed,
-        image_url: measure.image_url,
-        measure_type: measure.measureType.measure_type, // Flattening the measureType object
-      }));
+      customerMeasures = customerMeasures.map(
+        (measure: CustomerMeasureType) => ({
+          measure_uuid: measure.measure_uuid,
+          measure_datetime: measure.measure_datetime,
+          has_confirmed: measure.has_confirmed,
+          image_url: measure.image_url,
+          measure_type: measure.measureType.measure_type, // Flattening the measureType object
+        })
+      );
     } else {
       customerMeasures = await prisma.measure.findMany({
         where: {
