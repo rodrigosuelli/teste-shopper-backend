@@ -34,15 +34,20 @@ export async function uploadEndpoint(
     } = data;
 
     const measureTypesQuery = await prisma.measureType.findMany({
-      select: { id: true, type: true },
+      select: { id: true, measure_type: true },
     });
 
-    const availableMeasureTypes: Record<string, { id: number; type: string }> =
-      {};
+    const availableMeasureTypes: Record<
+      string,
+      { id: number; measure_type: string }
+    > = {};
 
     // Add each type as a property to the availableMeasureTypes object
-    measureTypesQuery.forEach(({ id, type }) => {
-      availableMeasureTypes[type] = { id, type };
+    measureTypesQuery.forEach((e) => {
+      availableMeasureTypes[e.measure_type] = {
+        id: e.id,
+        measure_type: e.measure_type,
+      };
     });
 
     const selectedMeasureTypeId = availableMeasureTypes[measure_type].id;
@@ -75,9 +80,9 @@ export async function uploadEndpoint(
 
     const alreadyRegisteredMeasureInMonth = await prisma.measure.findFirst({
       where: {
-        customerCode: customer_code,
-        measureTypeId: selectedMeasureTypeId,
-        datetime: {
+        customer_code,
+        measure_type_id: selectedMeasureTypeId,
+        measure_datetime: {
           gte: startOfMeasureDateMonth,
           lte: enfOfMeasureDateMonth,
         },
@@ -115,18 +120,18 @@ export async function uploadEndpoint(
     // Cadastrar measure no banco de dados
     const newMeasure = await prisma.measure.create({
       data: {
-        customerCode: customer_code,
-        datetime: measure_datetime,
-        imageUrl: uploadedImageUrl,
-        measureValue,
+        customer_code,
+        measure_datetime,
+        image_url: uploadedImageUrl,
+        measure_value: measureValue,
         measureType: { connect: { id: selectedMeasureTypeId } },
       },
     });
 
     res.status(200).json({
-      measure_value: newMeasure.measureValue,
-      measure_uuid: newMeasure.uuid,
-      image_url: newMeasure.imageUrl,
+      image_url: newMeasure.image_url,
+      measure_value: newMeasure.measure_value,
+      measure_uuid: newMeasure.measure_uuid,
     });
   } catch (error) {
     next(error);

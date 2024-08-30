@@ -18,7 +18,7 @@ export async function confirmEndpoint(
 
     const measureFound = await prisma.measure.findUnique({
       where: {
-        uuid: measure_uuid,
+        measure_uuid,
       },
     });
 
@@ -31,7 +31,7 @@ export async function confirmEndpoint(
       return;
     }
 
-    if (measureFound.hasConfirmed) {
+    if (measureFound.has_confirmed) {
       res.status(409).json({
         error_code: 'CONFIRMATION_DUPLICATE',
         error_description: 'Leitura já confirmada',
@@ -42,11 +42,11 @@ export async function confirmEndpoint(
     // Update measure in the database
     await prisma.measure.update({
       where: {
-        uuid: measure_uuid,
+        measure_uuid,
       },
       data: {
-        measureValue: confirmed_value,
-        hasConfirmed: true,
+        measure_value: confirmed_value,
+        has_confirmed: true,
       },
     });
 

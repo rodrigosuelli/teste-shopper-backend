@@ -6,7 +6,7 @@ async function main() {
   console.log('Starting seeding process...');
 
   const populatedMeasureTypes = await prisma.measureType.createManyAndReturn({
-    data: [{ type: 'WATER' }, { type: 'GAS' }],
+    data: [{ measure_type: 'WATER' }, { measure_type: 'GAS' }],
     skipDuplicates: true,
   });
 

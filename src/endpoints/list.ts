@@ -25,13 +25,13 @@ export async function listEndpoint(
 
     const customerMeasures = await prisma.measure.findMany({
       where: {
-        customerCode: customer_code,
+        customer_code,
       },
       select: {
-        uuid: true,
-        datetime: true,
-        hasConfirmed: true,
-        imageUrl: true,
+        measure_uuid: true,
+        measure_datetime: true,
+        has_confirmed: true,
+        image_url: true,
       },
     });
 

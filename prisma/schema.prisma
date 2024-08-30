@@ -14,26 +14,26 @@ datasource db {
 }
 
 model MeasureType {
-  id        Int       @id @default(autoincrement())
-  type      String    @unique @map("measure_type")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  measures  Measure[]
+  id           Int       @id @default(autoincrement())
+  measure_type String    @unique
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  measures     Measure[]
 
   @@map("measure_types")
 }
 
 model Measure {
-  uuid          String      @id @default(uuid()) @map("measure_uuid")
-  datetime      DateTime    @default(now()) @map("measure_datetime")
-  imageUrl      String      @map("image_url")
-  customerCode  String      @map("customer_code")
-  hasConfirmed  Boolean     @default(false) @map("has_confirmed")
-  measureValue  Int         @map("measure_value")
-  measureType   MeasureType @relation(fields: [measureTypeId], references: [id])
-  measureTypeId Int         @map("measure_type_id")
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
+  measure_uuid     String      @id @default(uuid())
+  measure_datetime DateTime    @default(now())
+  image_url        String
+  customer_code    String
+  has_confirmed    Boolean     @default(false)
+  measure_value    Int
+  measureType      MeasureType @relation(fields: [measure_type_id], references: [id])
+  measure_type_id  Int
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @updatedAt
 
   @@map("measures")
 }
