@@ -1,7 +1,7 @@
 FROM node:20-alpine
 
 # Create a non-root user and group to run the application
-RUN addgroup app && adduser -S -G app app
+RUN addgroup app && adduser --system --ingroup app app
 
 # set the user to run the app
 USER app
