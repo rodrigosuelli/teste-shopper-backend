@@ -2,7 +2,7 @@
   "name": "teste-shopper-backend",
   "version": "1.0.0",
   "engines": {
-    "node": "^20.11.0"
+    "node": "^20.17.0"
   },
   "description": "",
   "main": "src/server.ts",
