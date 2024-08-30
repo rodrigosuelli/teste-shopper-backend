@@ -11,6 +11,7 @@ import {
   uploadsFolderPath,
 } from '../config';
 import prisma from '../db/client';
+import getRegisteredMeasureTypes from '../helpers/getRegisteredMeasureTypes';
 
 export async function uploadEndpoint(
   req: Request,
@@ -33,35 +34,8 @@ export async function uploadEndpoint(
       measure_datetime,
     } = data;
 
-    const measureTypesQuery = await prisma.measureType.findMany({
-      select: { id: true, measure_type: true },
-    });
-
-    const availableMeasureTypes: Record<
-      string,
-      { id: number; measure_type: string }
-    > = {};
-
-    // Add each type as a property to the availableMeasureTypes object
-    measureTypesQuery.forEach((e) => {
-      availableMeasureTypes[e.measure_type] = {
-        id: e.id,
-        measure_type: e.measure_type,
-      };
-    });
-
-    const selectedMeasureTypeId = availableMeasureTypes[measure_type].id;
-
-    // Check for missing required measure types
-    const missingTypes = requiredMeasureTypes.filter(
-      (type) => !availableMeasureTypes[type]
-    );
-
-    if (missingTypes.length > 0) {
-      throw new Error(
-        `The following required measure types are not registered in the database: ${missingTypes.join(', ')}`
-      );
-    }
+    const registeredMeasureTypes = await getRegisteredMeasureTypes();
+    const selectedMeasureTypeId = registeredMeasureTypes[measure_type].id;
 
     const now = DateTime.now();
     const dateEntered = DateTime.fromISO(measure_datetime);
