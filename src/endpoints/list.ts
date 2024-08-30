@@ -1,7 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
-import { requiredMeasureTypes } from '../config';
 import prisma from '../db/client';
+import {
+  getRegisteredMeasureTypes,
+  requiredMeasureTypes,
+} from './helpers/measureTypes.helpers';
 
 export async function listEndpoint(
   req: Request<
@@ -23,17 +26,49 @@ export async function listEndpoint(
       ? measureTypeSchema.parse(upperCaseMeasureType)
       : null;
 
-    const customerMeasures = await prisma.measure.findMany({
-      where: {
-        customer_code,
-      },
-      select: {
-        measure_uuid: true,
-        measure_datetime: true,
-        has_confirmed: true,
-        image_url: true,
-      },
-    });
+    let customerMeasures = [];
+
+    // Filter by measure type
+    if (validatedMeasureType) {
+      const registeredMeasureTypes = await getRegisteredMeasureTypes();
+      const selectedMeasureTypeId =
+        registeredMeasureTypes[validatedMeasureType].id;
+
+      customerMeasures = await prisma.measure.findMany({
+        where: {
+          customer_code,
+          measure_type_id: selectedMeasureTypeId,
+        },
+        select: {
+          measure_uuid: true,
+          measure_datetime: true,
+          has_confirmed: true,
+          image_url: true,
+          measureType: { select: { measure_type: true } },
+        },
+      });
+
+      // Format: flatten the measureType relation field
+      customerMeasures = customerMeasures.map((measure) => ({
+        measure_uuid: measure.measure_uuid,
+        measure_datetime: measure.measure_datetime,
+        has_confirmed: measure.has_confirmed,
+        image_url: measure.image_url,
+        measure_type: measure.measureType.measure_type, // Flattening the measureType object
+      }));
+    } else {
+      customerMeasures = await prisma.measure.findMany({
+        where: {
+          customer_code,
+        },
+        select: {
+          measure_uuid: true,
+          measure_datetime: true,
+          has_confirmed: true,
+          image_url: true,
+        },
+      });
+    }
 
     if (!customerMeasures.length) {
       res.status(404).json({

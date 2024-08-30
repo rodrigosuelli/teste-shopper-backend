@@ -10,7 +10,4 @@ const uploadsFolderPath =
     ? path.resolve(__dirname, `../../${uploadsFolderName}`)
     : path.resolve(__dirname, `../${uploadsFolderName}`);
 
-// MeasureTypes
-const requiredMeasureTypes = ['WATER', 'GAS'] as const;
-
-export { PORT, uploadsFolderName, uploadsFolderPath, requiredMeasureTypes };
+export { PORT, uploadsFolderName, uploadsFolderPath };

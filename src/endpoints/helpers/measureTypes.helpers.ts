@@ -1,7 +1,9 @@
-import { requiredMeasureTypes } from '../../config';
 import prisma from '../../db/client';
 
-export default async function getRegisteredMeasureTypes() {
+// MeasureTypes
+const requiredMeasureTypes = ['WATER', 'GAS'] as const;
+
+async function getRegisteredMeasureTypes() {
   const measureTypesArr = await prisma.measureType.findMany({
     select: { id: true, measure_type: true },
   });
@@ -33,3 +35,5 @@ export default async function getRegisteredMeasureTypes() {
 
   return registeredMeasureTypes;
 }
+
+export { requiredMeasureTypes, getRegisteredMeasureTypes };

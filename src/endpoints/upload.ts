@@ -4,14 +4,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { DateTime } from 'luxon';
 import { promptWithBase64Image } from '../services/geminiApi';
 import saveBase64FileToDisk from '../utils/saveBase64FileToDisk';
-import {
-  PORT,
-  requiredMeasureTypes,
-  uploadsFolderName,
-  uploadsFolderPath,
-} from '../config';
+import { PORT, uploadsFolderName, uploadsFolderPath } from '../config';
 import prisma from '../db/client';
-import getRegisteredMeasureTypes from './helpers/getRegisteredMeasureTypes';
+import {
+  getRegisteredMeasureTypes,
+  requiredMeasureTypes,
+} from './helpers/measureTypes.helpers';
 
 export async function uploadEndpoint(
   req: Request,
