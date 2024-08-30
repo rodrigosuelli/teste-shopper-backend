@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import { requiredMeasureTypes } from '../config';
+import prisma from '../db/client';
 
-export function listEndpoint(
+export async function listEndpoint(
   req: Request<
     { customer_code: string },
     never,
@@ -16,17 +17,46 @@ export function listEndpoint(
     const { customer_code } = req.params;
     const { measure_type } = req.query;
 
-    const dataSchema = z.object({
-      customerCode: z.string(),
-      measure_type: z.enum(requiredMeasureTypes),
+    const upperCaseMeasureType = measure_type?.toUpperCase();
+    const measureTypeSchema = z.enum(requiredMeasureTypes);
+    const validatedMeasureType = upperCaseMeasureType
+      ? measureTypeSchema.parse(upperCaseMeasureType)
+      : null;
+
+    const customerMeasures = await prisma.measure.findMany({
+      where: {
+        customerCode: customer_code,
+      },
+      select: {
+        uuid: true,
+        datetime: true,
+        hasConfirmed: true,
+        imageUrl: true,
+      },
     });
 
-    const data = dataSchema.parse({ customer_code, measure_type });
+    if (!customerMeasures.length) {
+      res.status(404).json({
+        error_code: 'MEASURES_NOT_FOUND',
+        error_description: 'Nenhuma leitura encontrada',
+      });
+      return;
+    }
 
     res.status(200).json({
-      success: true,
+      customer_code,
+      measures: customerMeasures,
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({
+        error_code: 'INVALID_TYPE',
+        error_description: 'Tipo de medição não permitida',
+      });
+
+      return;
+    }
+
     next(error);
   }
 }
