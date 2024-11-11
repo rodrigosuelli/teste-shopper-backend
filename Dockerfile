@@ -21,27 +21,23 @@ RUN chown -R app:app .
 # Switch back to the non-root user
 USER app
 
-# Copy the rest of the application code
-# COPY . .
+# Install dependencies
+# Use `npm install --omit=dev` to skip dev dependencies
+RUN npm install
 
-# IMPORTANT: Copy files before run npm install to avoid typescript implicit any errors related to prismaORM
-# This is required because after running npm install prisma auto generates the prismaClient based on the local prisma schema file
 # Copy the rest of the application files and directories with read and write permissions to all of them
 COPY --chown=app:app . .
 
-# Install dependencies
-RUN npm install
+# IMPORTANT: Generate prisma client before running tsc so we dont get prisma implicit any type errors
+# After running `npm install`, prisma auto generates prismaClient based on local prisma schema file,
+# but since here we copied the files after `npm install`, we need to generate prisma client manually
+RUN npm run prisma:generate
 
 # Build the project
 RUN npm run build
-
-# Install only production dependencies
-# Use `npm install --omit=dev` to skip dev dependencies
-# RUN npm install --omit=dev
 
 # Expose the application port
 EXPOSE 3000
 
 # Set the command to run the application
-# CMD ["npm", "run", "start"]
 CMD ["npm", "run", "start:migrate:seed"]
