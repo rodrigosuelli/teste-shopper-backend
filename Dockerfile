@@ -25,6 +25,7 @@ USER app
 # COPY . .
 
 # IMPORTANT: Copy files before run npm install to avoid typescript implicit any errors related to prismaORM
+# This happens because after running npm install prisma auto generates the prismaClient based on the local prisma schema file
 # Copy the rest of the application files and directories with read and write permissions to all of them
 COPY --chown=app:app . .
 
