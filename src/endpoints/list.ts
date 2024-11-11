@@ -6,16 +6,6 @@ import {
   requiredMeasureTypes,
 } from './helpers/measureTypes.helpers';
 
-type CustomerMeasureType = {
-  measure_uuid: string;
-  measure_datetime: Date;
-  has_confirmed: boolean;
-  image_url: string | null;
-  measureType: {
-    measure_type: string;
-  };
-};
-
 export async function listEndpoint(
   req: Request<
     { customer_code: string },
@@ -73,7 +63,7 @@ export async function listEndpoint(
     }
 
     // Format: flatten the measureType relation field
-    customerMeasures = customerMeasures.map((measure: CustomerMeasureType) => ({
+    customerMeasures = customerMeasures.map((measure) => ({
       measure_uuid: measure.measure_uuid,
       measure_datetime: measure.measure_datetime,
       has_confirmed: measure.has_confirmed,

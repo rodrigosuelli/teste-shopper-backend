@@ -21,14 +21,15 @@ RUN chown -R app:app .
 # Switch back to the non-root user
 USER app
 
-# Install dependencies
-RUN npm install
-
 # Copy the rest of the application code
 # COPY . .
 
+# IMPORTANT: Copy files before run npm install to avoid typescript implicit any errors related to prismaORM
 # Copy the rest of the application files and directories with read and write permissions to all of them
 COPY --chown=app:app . .
+
+# Install dependencies
+RUN npm install
 
 # Build the project
 RUN npm run build
